@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Profile - Healthcare AI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
+        .medical-gradient { background: linear-gradient(135deg, #2563eb 0%, #059669 100%); }
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .profile-avatar { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .form-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .checkbox-custom { appearance: none; width: 1.25rem; height: 1.25rem; border: 2px solid #d1d5db; border-radius: 0.25rem; position: relative; }
+        .checkbox-custom:checked { background-color: #2563eb; border-color: #2563eb; }
+        .checkbox-custom:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.875rem; }
+        .progress-ring { transform: rotate(-90deg); }
+        .progress-ring-circle { transition: stroke-dashoffset 0.35s; }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 medical-gradient rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Healthcare AI</h1>
+                        <p class="text-xs text-gray-500">Health Profile</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                    </a>
+                    <a href="results.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Your Health Profile</h2>
+            <p class="text-lg text-gray-600">Manage your personal health information and preferences</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Profile Information -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Basic Information -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 profile-avatar rounded-full mr-4">
+                            <span id="userInitials">JD</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">Basic Information</h3>
+                            <p class="text-gray-600">Update your personal details</p>
+                        </div>
+                    </div>
+
+                    <form id="profileForm" class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input 
+                                type="text" 
+                                id="fullName" 
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                placeholder="Enter your full name"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                placeholder="your.email@example.com"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                            <input 
+                                type="number" 
+                                id="age" 
+                                min="1" 
+                                max="120" 
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                placeholder="Enter your age"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                            <select 
+                                id="gender" 
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                            >
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer-not-to-say">Prefer not to say</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                            <input 
+                                type="number" 
+                                id="weight" 
+                                min="1" 
+                                max="500" 
+                                step="0.1"
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                placeholder="Enter your weight"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                            <input 
+                                type="number" 
+                                id="height" 
+                                min="1" 
+                                max="300" 
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                placeholder="Enter your height"
+                            >
+                        </div>
+                    </form>
+
+                    <div class="mt-6 flex justify-end">
+                        <button 
+                            id="saveBasicInfo" 
+                            class="bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-green-700 transition-all"
+                        >
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Medical History -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Medical History</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Chronic Conditions</h4>
+                            <div class="grid md:grid-cols-2 gap-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="diabetes">
+                                    <span class="text-gray-700">Diabetes</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="hypertension">
+                                    <span class="text-gray-700">Hypertension</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="asthma">
+                                    <span class="text-gray-700">Asthma</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="heart-disease">
+                                    <span class="text-gray-700">Heart Disease</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="arthritis">
+                                    <span class="text-gray-700">Arthritis</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="thyroid">
+                                    <span class="text-gray-700">Thyroid Disorders</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Allergies</h4>
+                            <div class="grid md:grid-cols-2 gap-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="penicillin">
+                                    <span class="text-gray-700">Penicillin</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="sulfa">
+                                    <span class="text-gray-700">Sulfa Drugs</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="aspirin">
+                                    <span class="text-gray-700">Aspirin</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="nsaids">
+                                    <span class="text-gray-700">NSAIDs</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="food-allergies">
+                                    <span class="text-gray-700">Food Allergies</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="seasonal">
+                                    <span class="text-gray-700">Seasonal Allergies</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Current Medications</h4>
+                            <textarea 
+                                id="currentMedications" 
+                                rows="3" 
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                placeholder="List any medications you're currently taking (include dosage and frequency)"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button 
+                            id="saveMedicalHistory" 
+                            class="bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-green-700 transition-all"
+                        >
+                            Save Medical History
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lifestyle Preferences -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Lifestyle & Preferences</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Activity Level</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="activityLevel" value="sedentary" class="mr-3">
+                                    <div>
+                                        <div class="font-medium text-gray-900">Sedentary</div>
+                                        <div class="text-sm text-gray-600">Little to no exercise</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="activityLevel" value="light" class="mr-3">
+                                    <div>
+                                        <div class="font-medium text-gray-900">Light</div>
+                                        <div class="text-sm text-gray-600">1-3 days/week</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="activityLevel" value="moderate" class="mr-3">
+                                    <div>
+                                        <div class="font-medium text-gray-900">Moderate</div>
+                                        <div class="text-sm text-gray-600">3-5 days/week</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="activityLevel" value="active" class="mr-3">
+                                    <div>
+                                        <div class="font-medium text-gray-900">Active</div>
+                                        <div class="text-sm text-gray-600">6-7 days/week</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Dietary Preferences</h4>
+                            <div class="grid md:grid-cols-3 gap-3">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="vegetarian">
+                                    <span class="text-gray-700">Vegetarian</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="vegan">
+                                    <span class="text-gray-700">Vegan</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="keto">
+                                    <span class="text-gray-700">Ketogenic</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="low-sodium">
+                                    <span class="text-gray-700">Low Sodium</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="low-sugar">
+                                    <span class="text-gray-700">Low Sugar</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="checkbox-custom mr-3" value="gluten-free">
+                                    <span class="text-gray-700">Gluten-Free</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-medium text-gray-900 mb-4">Sleep Schedule</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Bedtime</label>
+                                    <input 
+                                        type="time" 
+                                        id="bedtime" 
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Wake Time</label>
+                                    <input 
+                                        type="time" 
+                                        id="waketime" 
+                                        class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button 
+                            id="saveLifestyle" 
+                            class="bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-green-700 transition-all"
+                        >
+                            Save Preferences
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Health Summary -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Health Summary</h4>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">BMI</span>
+                            <span id="bmiValue" class="font-semibold text-gray-900">--</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="bmiBar" class="h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div id="bmiCategory" class="text-sm text-gray-600">Calculate BMI by entering height and weight</div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h5 class="font-medium text-gray-900 mb-3">Health Score</h5>
+                        <div class="flex items-center justify-center">
+                            <div class="relative">
+                                <svg class="progress-ring w-24 h-24">
+                                    <circle
+                                        class="text-gray-200"
+                                        stroke-width="4"
+                                        stroke="currentColor"
+                                        fill="transparent"
+                                        r="40"
+                                        cx="48"
+                                        cy="48"
+                                    />
+                                    <circle
+                                        id="healthScoreCircle"
+                                        class="progress-ring-circle text-green-500"
+                                        stroke-width="4"
+                                        stroke-dasharray="251.2"
+                                        stroke-dashoffset="251.2"
+                                        stroke-linecap="round"
+                                        stroke="currentColor"
+                                        fill="transparent"
+                                        r="40"
+                                        cx="48"
+                                        cy="48"
+                                    />
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span id="healthScoreValue" class="text-2xl font-bold text-gray-900">--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center text-sm text-gray-600 mt-2">Overall Health Score</div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-gray-900">Symptom Analysis</div>
+                                <div class="text-xs text-gray-500">2 hours ago</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-gray-900">Profile Updated</div>
+                                <div class="text-xs text-gray-500">1 day ago</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-gray-900">Health Tips Viewed</div>
+                                <div class="text-xs text-gray-500">3 days ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Data Management</h4>
+                    <div class="space-y-3">
+                        <button id="exportDataBtn" class="w-full bg-blue-50 text-blue-700 py-2 px-4 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+                            Export Health Data
+                        </button>
+                        <button id="clearHistoryBtn" class="w-full bg-orange-50 text-orange-700 py-2 px-4 rounded-lg hover:bg-orange-100 transition-colors text-sm font-medium">
+                            Clear Analysis History
+                        </button>
+                        <button id="deleteAccountBtn" class="w-full bg-red-50 text-red-700 py-2 px-4 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium">
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Privacy Settings -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Privacy Settings</h4>
+                    <div class="space-y-4">
+                        <label class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium text-gray-900">Data Analytics</div>
+                                <div class="text-sm text-gray-600">Help improve the service</div>
+                            </div>
+                            <input type="checkbox" class="checkbox-custom" checked>
+                        </label>
+                        
+                        <label class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium text-gray-900">Health Insights</div>
+                                <div class="text-sm text-gray-600">Personalized recommendations</div>
+                            </div>
+                            <input type="checkbox" class="checkbox-custom" checked>
+                        </label>
+                        
+                        <label class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium text-gray-900">Email Notifications</div>
+                                <div class="text-sm text-gray-600">Health tips and updates</div>
+                            </div>
+                            <input type="checkbox" class="checkbox-custom">
+                        </label>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                            Save Privacy Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p class="text-sm text-gray-600">
+                    © 2025 Healthcare AI Assistant. This tool is for educational purposes and should not replace professional medical advice.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        class ProfilePage {
+            constructor() {
+                this.userProfile = this.loadUserProfile();
+                this.initializePage();
+            }
+
+            initializePage() {
+                this.populateForm();
+                this.setupEventListeners();
+                this.calculateBMI();
+                this.calculateHealthScore();
+                this.updateUserInitials();
+            }
+
+            loadUserProfile() {
+                const profile = localStorage.getItem('userProfile');
+                return profile ? JSON.parse(profile) : {
+                    fullName: '',
+                    email: '',
+                    age: '',
+                    gender: '',
+                    weight: '',
+                    height: '',
+                    chronicConditions: [],
+                    allergies: [],
+                    currentMedications: '',
+                    activityLevel: 'moderate',
+                    dietaryPreferences: [],
+                    bedtime: '',
+                    waketime: '',
+                    privacySettings: {
+                        dataAnalytics: true,
+                        healthInsights: true,
+                        emailNotifications: false
+                    }
+                };
+            }
+
+            saveUserProfile() {
+                localStorage.setItem('userProfile', JSON.stringify(this.userProfile));
+            }
+
+            populateForm() {
+                // Basic information
+                document.getElementById('fullName').value = this.userProfile.fullName || '';
+                document.getElementById('email').value = this.userProfile.email || '';
+                document.getElementById('age').value = this.userProfile.age || '';
+                document.getElementById('gender').value = this.userProfile.gender || '';
+                document.getElementById('weight').value = this.userProfile.weight || '';
+                document.getElementById('height').value = this.userProfile.height || '';
+
+                // Medical history
+                this.userProfile.chronicConditions.forEach(condition => {
+                    const checkbox = document.querySelector(`input[value="${condition}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+
+                this.userProfile.allergies.forEach(allergy => {
+                    const checkbox = document.querySelector(`input[value="${allergy}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+
+                document.getElementById('currentMedications').value = this.userProfile.currentMedications || '';
+
+                // Lifestyle preferences
+                document.querySelector(`input[name="activityLevel"][value="${this.userProfile.activityLevel}"]`).checked = true;
+
+                this.userProfile.dietaryPreferences.forEach(preference => {
+                    const checkbox = document.querySelector(`input[value="${preference}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+
+                document.getElementById('bedtime').value = this.userProfile.bedtime || '';
+                document.getElementById('waketime').value = this.userProfile.waketime || '';
+
+                // Privacy settings
+                document.querySelectorAll('.privacy-setting').forEach((checkbox, index) => {
+                    const settings = ['dataAnalytics', 'healthInsights', 'emailNotifications'];
+                    checkbox.checked = this.userProfile.privacySettings[settings[index]];
+                });
+            }
+
+            setupEventListeners() {
+                // Save basic information
+                document.getElementById('saveBasicInfo').addEventListener('click', () => {
+                    this.saveBasicInfo();
+                });
+
+                // Save medical history
+                document.getElementById('saveMedicalHistory').addEventListener('click', () => {
+                    this.saveMedicalHistory();
+                });
+
+                // Save lifestyle preferences
+                document.getElementById('saveLifestyle').addEventListener('click', () => {
+                    this.saveLifestylePreferences();
+                });
+
+                // BMI calculation on weight/height change
+                document.getElementById('weight').addEventListener('input', () => this.calculateBMI());
+                document.getElementById('height').addEventListener('input', () => this.calculateBMI());
+
+                // Data management buttons
+                document.getElementById('exportDataBtn').addEventListener('click', () => this.exportData());
+                document.getElementById('clearHistoryBtn').addEventListener('click', () => this.clearHistory());
+                document.getElementById('deleteAccountBtn').addEventListener('click', () => this.deleteAccount());
+            }
+
+            saveBasicInfo() {
+                this.userProfile.fullName = document.getElementById('fullName').value;
+                this.userProfile.email = document.getElementById('email').value;
+                this.userProfile.age = parseInt(document.getElementById('age').value) || '';
+                this.userProfile.gender = document.getElementById('gender').value;
+                this.userProfile.weight = parseFloat(document.getElementById('weight').value) || '';
+                this.userProfile.height = parseInt(document.getElementById('height').value) || '';
+
+                this.saveUserProfile();
+                this.updateUserInitials();
+                this.calculateBMI();
+                this.calculateHealthScore();
+                this.showNotification('Basic information saved successfully!', 'success');
+            }
+
+            saveMedicalHistory() {
+                // Get chronic conditions
+                const chronicConditions = [];
+                document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                    if (['diabetes', 'hypertension', 'asthma', 'heart-disease', 'arthritis', 'thyroid'].includes(checkbox.value)) {
+                        chronicConditions.push(checkbox.value);
+                    }
+                });
+
+                // Get allergies
+                const allergies = [];
+                document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                    if (['penicillin', 'sulfa', 'aspirin', 'nsaids', 'food-allergies', 'seasonal'].includes(checkbox.value)) {
+                        allergies.push(checkbox.value);
+                    }
+                });
+
+                this.userProfile.chronicConditions = chronicConditions;
+                this.userProfile.allergies = allergies;
+                this.userProfile.currentMedications = document.getElementById('currentMedications').value;
+
+                this.saveUserProfile();
+                this.calculateHealthScore();
+                this.showNotification('Medical history saved successfully!', 'success');
+            }
+
+            saveLifestylePreferences() {
+                const activityLevel = document.querySelector('input[name="activityLevel"]:checked')?.value || 'moderate';
+                
+                const dietaryPreferences = [];
+                document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                    if (['vegetarian', 'vegan', 'keto', 'low-sodium', 'low-sugar', 'gluten-free'].includes(checkbox.value)) {
+                        dietaryPreferences.push(checkbox.value);
+                    }
+                });
+
+                this.userProfile.activityLevel = activityLevel;
+                this.userProfile.dietaryPreferences = dietaryPreferences;
+                this.userProfile.bedtime = document.getElementById('bedtime').value;
+                this.userProfile.waketime = document.getElementById('waketime').value;
+
+                this.saveUserProfile();
+                this.calculateHealthScore();
+                this.showNotification('Lifestyle preferences saved successfully!', 'success');
+            }
+
+            calculateBMI() {
+                const weight = parseFloat(this.userProfile.weight);
+                const height = parseInt(this.userProfile.height);
+
+                if (weight && height) {
+                    const heightInMeters = height / 100;
+                    const bmi = weight / (heightInMeters * heightInMeters);
+                    const bmiRounded = Math.round(bmi * 10) / 10;
+
+                    document.getElementById('bmiValue').textContent = bmiRounded;
+
+                    // BMI categories and colors
+                    let category, color, percentage;
+                    if (bmi < 18.5) {
+                        category = 'Underweight';
+                        color = '#3b82f6'; // blue
+                        percentage = Math.min(bmi / 18.5 * 20, 20);
+                    } else if (bmi < 25) {
+                        category = 'Normal weight';
+                        color = '#10b981'; // green
+                        percentage = 20 + ((bmi - 18.5) / 6.5) * 20;
+                    } else if (bmi < 30) {
+                        category = 'Overweight';
+                        color = '#f59e0b'; // yellow
+                        percentage = 40 + ((bmi - 25) / 5) * 20;
+                    } else {
+                        category = 'Obese';
+                        color = '#ef4444'; // red
+                        percentage = Math.min(60 + ((bmi - 30) / 10) * 40, 100);
+                    }
+
+                    document.getElementById('bmiCategory').textContent = category;
+                    document.getElementById('bmiBar').style.width = `${percentage}%`;
+                    document.getElementById('bmiBar').style.backgroundColor = color;
+                } else {
+                    document.getElementById('bmiValue').textContent = '--';
+                    document.getElementById('bmiCategory').textContent = 'Calculate BMI by entering height and weight';
+                    document.getElementById('bmiBar').style.width = '0%';
+                }
+            }
+
+            calculateHealthScore() {
+                let score = 0;
+                let maxScore = 100;
+
+                // Age factor (0-20 points)
+                if (this.userProfile.age) {
+                    if (this.userProfile.age < 30) score += 20;
+                    else if (this.userProfile.age < 50) score += 15;
+                    else if (this.userProfile.age < 70) score += 10;
+                    else score += 5;
+                }
+
+                // BMI factor (0-20 points)
+                const weight = parseFloat(this.userProfile.weight);
+                const height = parseInt(this.userProfile.height);
+                if (weight && height) {
+                    const heightInMeters = height / 100;
+                    const bmi = weight / (heightInMeters * heightInMeters);
+                    if (bmi >= 18.5 && bmi < 25) score += 20;
+                    else if (bmi >= 25 && bmi < 30) score += 15;
+                    else score += 5;
+                }
+
+                // Activity level (0-20 points)
+                const activityScores = {
+                    'sedentary': 5,
+                    'light': 10,
+                    'moderate': 15,
+                    'active': 20
+                };
+                score += activityScores[this.userProfile.activityLevel] || 10;
+
+                // Medical conditions (-20 to 0 points)
+                const conditionPenalty = this.userProfile.chronicConditions.length * 5;
+                score = Math.max(0, score - conditionPenalty);
+
+                // Allergies (-10 to 0 points)
+                const allergyPenalty = this.userProfile.allergies.length * 2;
+                score = Math.max(0, score - allergyPenalty);
+
+                // Sleep schedule (0-15 points)
+                if (this.userProfile.bedtime && this.userProfile.waketime) {
+                    score += 15;
+                }
+
+                // Dietary preferences (0-10 points)
+                if (this.userProfile.dietaryPreferences.length > 0) {
+                    score += 10;
+                }
+
+                // Complete profile bonus (0-15 points)
+                if (this.userProfile.fullName && this.userProfile.email && this.userProfile.age) {
+                    score += 15;
+                }
+
+                score = Math.min(score, 100);
+
+                // Update UI
+                document.getElementById('healthScoreValue').textContent = score;
+                
+                const circle = document.getElementById('healthScoreCircle');
+                const circumference = 2 * Math.PI * 40; // radius = 40
+                const offset = circumference - (score / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+
+                // Color based on score
+                let color;
+                if (score >= 80) color = '#10b981'; // green
+                else if (score >= 60) color = '#f59e0b'; // yellow
+                else color = '#ef4444'; // red
+                
+                circle.className = `progress-ring-circle text-${color.replace('#', '')}`;
+                circle.style.color = color;
+            }
+
+            updateUserInitials() {
+                const name = this.userProfile.fullName || 'User';
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+                document.getElementById('userInitials').textContent = initials;
+            }
+
+            exportData() {
+                const data = {
+                    profile: this.userProfile,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `healthcare-profile-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                this.showNotification('Health data exported successfully!', 'success');
+            }
+
+            clearHistory() {
+                if (confirm('Are you sure you want to clear your analysis history? This action cannot be undone.')) {
+                    localStorage.removeItem('healthAnalysisResults');
+                    sessionStorage.removeItem('symptomAnalysis');
+                    this.showNotification('Analysis history cleared successfully!', 'success');
+                }
+            }
+
+            deleteAccount() {
+                if (confirm('Are you sure you want to delete your account? This will permanently remove all your data and cannot be undone.')) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    this.showNotification('Account deleted successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+                    type === 'success' ? 'bg-green-500 text-white' : 
+                    type === 'error' ? 'bg-red-500 text-white' : 
+                    'bg-blue-500 text-white'
+                }`;
+                notification.textContent = message;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 3000);
+            }
+        }
+
+        // Initialize profile page
+        const profilePage = new ProfilePage();
+
+        // Animate page elements on load
+        document.addEventListener('DOMContentLoaded', function() {
+            anime({
+                targets: '.hover-lift',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                duration: 600,
+                easing: 'easeOutExpo'
+            });
+        });
+    </script>
+</body>
+</html>
