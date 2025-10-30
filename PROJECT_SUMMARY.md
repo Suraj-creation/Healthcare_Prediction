@@ -244,7 +244,7 @@ You can create LICENSE file separately if needed.
 ### Git History
 ```bash
 Commit: a2548fc
-Author: [Your Name]
+Author: [Suraj Kumar]
 Date: October 31, 2025
 Message: 🎉 Initial commit: Healthcare AI Assistant v2.0 with Gemini AI integration
 

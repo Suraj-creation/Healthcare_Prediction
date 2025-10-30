@@ -1,0 +1,16 @@
+# Vercel ignore file
+.git
+.github
+.vscode
+.clinerules
+.kilocode
+.roo
+node_modules
+*.md
+!README.md
+CLAUDE.md
+FIX_SUMMARY.md
+PROJECT_SUMMARY.md
+QUICK_FIX_GUIDE.md
+AI_TROUBLESHOOTING_GUIDE.md
+GEMINI_AI_INTEGRATION.md
